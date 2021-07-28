@@ -25,6 +25,8 @@ After you install the escript, make sure you add the directory where Elixir keep
 https://www.kaggle.com/sudalairajkumar/covid19-in-india?select=covid_vaccine_statewise.csv
 (last updated from source on 28 Jul, 2021)
 
+_Dataset licenced under Attribution 4.0 International (CC BY 4.0)_
+
 From this dataset the project uses, India's statewise COVID vaccination under `data/covid-vaccination/covid_vaccine_statewise.csv`.
 
 #### Population Dataset
@@ -32,5 +34,7 @@ From this dataset the project uses, India's statewise COVID vaccination under `d
 "COVID-19 Vaccination India : District wise data" by @arnabbiswas1 on Kaggle.
 https://www.kaggle.com/arnabbiswas1/covid-vaccination-india-district-wise-data?select=india_state_wise_projected_population_2021.csv
 (last updated from source on 28 Jul, 2021)
+
+_CC0 1.0 Universal (CC0 1.0) Public Domain Dedication_
 
 From this dataset the project uses, India's statewise Projected Population under `data/population/india_state_wise_projected_population_2021.csv`.
