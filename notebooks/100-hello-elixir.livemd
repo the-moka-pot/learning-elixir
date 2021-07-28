@@ -1,0 +1,167 @@
+# 100 — Hello Elixir!
+
+## Learn elixir in 10 Minutes
+
+Elixir is a modern functional language built on top of the Erlang VM. It’s fully compatible with Erlang, but features a more standard syntax and many more features.
+
+## Basic Data Types
+
+### Strings
+
+Strings in Elixir are delimited by double quotes, and they are encoded in UTF-8.
+
+```elixir
+"Hello World! 🍕"
+```
+
+```elixir
+IO.puts("Printing is easy!")
+```
+
+### Atoms
+
+An atom is a constant whose value is its own name. They start with "`:`", no spaces.
+
+Generally we use `atoms` to match the values. In elixir, it's a common practice to use `:ok`, `:error`, `:true`, `:false` to identify and match values.
+
+```elixir
+:hello
+```
+
+```elixir
+:apple == :orange
+```
+
+```elixir
+:apple == :apple
+```
+
+### Numbers
+
+```elixir
+1 + 2
+```
+
+```elixir
+5 * 5
+```
+
+```elixir
+1 / 2
+```
+
+```elixir
+# Square root, using Erlang's math module
+:math.sqrt(121)
+```
+
+#### Let's prove some maths
+
+$$
+tan(x) = \frac{sin(x)}{cos(x)}
+$$
+
+```elixir
+# Mathematical value of 45° angle
+degree_45 = :math.pi() * 45 / 180
+```
+
+```elixir
+sin_of_45 = :math.sin(degree_45)
+cos_of_45 = :math.cos(degree_45)
+tan_of_45 = :math.tan(degree_45)
+
+tan_of_45 == cos_of_45 / sin_of_45
+```
+
+### Lists
+
+```elixir
+[100, 150, 200, 250]
+```
+
+```elixir
+cashbacks = [10, 50, 20, 500, 250]
+total = Enum.sum(cashbacks)
+
+"You recieved total ₹#{total} as rewards for #{Enum.count(cashbacks)} payments."
+```
+
+```elixir
+"Also, maximum cashback of ₹#{Enum.max(cashbacks)}. Noice!"
+```
+
+```elixir
+# List Concatenation
+[100, 150, 200, 250] ++ [300, 350]
+```
+
+```elixir
+# Mixed Data Types
+[:cat, :dog, :cow] ++ ["fox", 30, 10.5]
+```
+
+```elixir
+# Range as a list
+for num <- 1..4 do
+  IO.puts(num)
+end
+```
+
+This above comprehension can also be evaluated using `Enum` functions, which is more idiomatic.
+
+```elixir
+Enum.each(1..4, fn num -> IO.puts(num) end)
+```
+
+Or even better, using pipe symbol `|>` to pass the first argument to the function.
+
+```elixir
+1..10 |> Enum.each(fn num -> IO.puts(num) end)
+```
+
+### Maps & Keyword Maps
+
+```elixir
+farm = %{"pigs" => 10, "cows" => 5}
+```
+
+```elixir
+farm["cows"]
+```
+
+##### Keyword Maps using `:atoms` as keys
+
+```elixir
+farm = %{pigs: 10, cows: 5}
+farm.pigs
+```
+
+##### List of Maps
+
+```elixir
+people = [
+  john: %{age: 31, languages: ["Erlang", "Ruby", "Elixir"], name: "John"},
+  mary: %{age: 29, languages: ["Elixir", "PHP", "Clojure"], name: "Mary"},
+  jane: %{age: 23, languages: ["Elixir", "Python"], name: "Jane"}
+]
+```
+
+```elixir
+people[:jane].languages
+```
+
+```elixir
+people[:jane].languages |> Enum.each(fn lang -> IO.puts("I ❤️ #{lang}") end)
+```
+
+```elixir
+person = people[:mary]
+# person = people[:jane]
+
+if "PHP" in person.languages do
+  "⛔️ Oh no, #{person.name} likes PHP."
+else
+  "☑️ #{person.name} is sensible, they don't like PHP."
+end
+```
