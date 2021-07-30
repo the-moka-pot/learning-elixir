@@ -25,6 +25,10 @@ An atom is a constant whose value is its own name. They start with "`:`", no spa
 Generally we use `atoms` to match the values. In elixir, it's a common practice to use `:ok`, `:error`, `:true`, `:false` to identify and match values.
 
 ```elixir
+Atom.to_string(:hello) == "hello"
+```
+
+```elixir
 :hello
 ```
 
@@ -71,7 +75,7 @@ sin_of_45 = :math.sin(degree_45)
 cos_of_45 = :math.cos(degree_45)
 tan_of_45 = :math.tan(degree_45)
 
-tan_of_45 == cos_of_45 / sin_of_45
+tan_of_45 == sin_of_45 / cos_of_45
 ```
 
 ### Lists
@@ -118,6 +122,14 @@ Or even better, using pipe symbol `|>` to pass the first argument to the functio
 
 ```elixir
 1..10 |> Enum.each(fn num -> IO.puts(num) end)
+```
+
+```elixir
+" hello.  "
+|> String.upcase()
+|> String.trim()
+|> String.replace(".", "")
+|> String.to_atom()
 ```
 
 ### Maps & Keyword Maps
