@@ -1,0 +1,180 @@
+# Data Science in Elixir
+
+## Introduction
+
+### Module Dependencies
+
+* `Nx` — Allows you to handle numberical data on Elixir.
+* `NimbleCSV` — To parse CSV files quickly & easily.
+* `LearnKit` — Lets you run pre-defined data science models over your data.
+* `Vega Lite` — A Javascript library which generates charting and graphs.
+* `Kino` — Allows VegaLite chart schemas to be displayed in Livebook.
+
+```elixir
+Mix.install([
+  {:nx, github: "elixir-nx/nx", sparse: "nx"},
+  {:learn_kit, "~> 0.1.6"},
+  :nimble_csv,
+  :vega_lite,
+  :kino
+])
+```
+
+```elixir
+# Using standard parser for comma separated CSVs
+alias NimbleCSV.RFC4180, as: CSV
+
+# VL is used for charting
+alias VegaLite, as: Vl
+
+# Linear Regression as our Data Science Models
+alias LearnKit.Regression.Linear
+```
+
+## Vaccinations in India
+
+```elixir
+pop =
+  "data/population/india_state_wise_projected_population_2021.csv"
+  |> File.read!()
+  |> CSV.parse_string()
+  # |> Enum.map(fn [x, y] -> {x, y} end)
+  |> Enum.map(fn [x, y] -> {x, String.to_integer(y)} end)
+  |> Map.new()
+```
+
+```elixir
+india_pop =
+  pop
+  |> Enum.reduce(0, fn {_state, population}, total -> population + total end)
+```
+
+```elixir
+Vl.new(width: 700, height: 200)
+|> Vl.data_from_series(state: Map.keys(pop), size: Map.values(pop))
+|> Vl.mark(:bar, tooltip: true)
+|> Vl.encode_field(:x, "state", type: :ordinal)
+|> Vl.encode_field(:y, "size", type: :quantitative)
+```
+
+```elixir
+vacc =
+  "data/covid-vaccination/covid_vaccine_statewise.csv"
+  |> File.read!()
+  |> CSV.parse_string(skip_headers: false)
+```
+
+```elixir
+header = vacc |> Enum.at(0)
+data = vacc |> Enum.slice(1..-1)
+
+transform_row = fn row ->
+  row
+  |> Enum.with_index(fn value, index ->
+    {
+      Enum.at(header, index),
+      value
+    }
+  end)
+  |> Map.new()
+end
+
+vacc =
+  data
+  |> Enum.map(fn r -> transform_row.(r) end)
+```
+
+```elixir
+to_number = fn x ->
+  case Float.parse(x) do
+    {num, _} -> round(num)
+    :error -> 0
+  end
+end
+
+to_number.("24517.0")
+```
+
+```elixir
+to_date = fn <<dd::binary-size(2), "/", mm::binary-size(2), "/", yyyy::binary-size(4)>> ->
+  {:ok, dt} = Date.from_iso8601("#{yyyy}-#{mm}-#{dd}")
+  dt
+end
+
+to_date.("16/01/2021")
+```
+
+```elixir
+create_custom_map = fn row, index ->
+  %{
+    "date" => to_date.(row["Updated On"]),
+    "day" => index,
+    "dose1" => row["First Dose Administered"] |> to_number.()
+  }
+end
+
+data =
+  vacc
+  |> Enum.filter(fn row -> row["State"] == "Delhi" end)
+  |> Enum.with_index(fn row, index -> create_custom_map.(row, index) end)
+```
+
+```elixir
+data =
+  vacc
+  |> Enum.filter(fn row -> row["State"] == "Delhi" end)
+  |> Enum.with_index(fn row, index ->
+    {index, to_number.(row["First Dose Administered"])}
+  end)
+  |> Map.new()
+```
+
+```elixir
+last_day = data |> Map.keys() |> Enum.max()
+```
+
+#### Linear Regression
+
+$y = (m * x) + b$
+
+$dose1 = (m * day) + b$
+
+```elixir
+predictor = Linear.new(Map.keys(data), Map.values(data)) |> Linear.fit()
+```
+
+<!-- livebook:{"livebook_object":"cell_input","name":"end_day","type":"number","value":"360"} -->
+
+```elixir
+from = last_day + 1
+{to, _} = IO.gets(:end_day) |> Integer.parse()
+
+{:ok, predictions} = predictor |> Linear.predict(Enum.to_list(from..to))
+
+predictions =
+  predictions
+  |> Enum.with_index(fn point, index -> {index + from, round(point)} end)
+  |> Map.new()
+```
+
+```elixir
+Vl.new(width: 700, height: 200)
+|> Vl.data_from_series(
+  day: Map.keys(data),
+  dose1: Map.values(data)
+)
+|> Vl.mark(:area, tooltip: true)
+|> Vl.encode_field(:x, "day", type: :quantitative)
+|> Vl.encode_field(:y, "dose1", type: :quantitative)
+```
+
+```elixir
+Vl.new(width: 700, height: 200)
+|> Vl.data_from_series(
+  projected_day: Map.keys(predictions),
+  projected_dose1: Map.values(predictions)
+)
+|> Vl.mark(:circle, tooltip: true)
+|> Vl.encode_field(:x, "projected_day", type: :quantitative)
+|> Vl.encode_field(:y, "projected_dose1", type: :quantitative)
+```
